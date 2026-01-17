@@ -77,6 +77,10 @@ tfds build --overwrite
 The command line output should finish with a summary of the generated dataset (including size and number of samples). 
 Please verify that this output looks as expected and that you can find the generated `tfrecord` files in `~/tensorflow_datasets/<name_of_your_dataset>`.
 
+or
+```
+tfds build --data_dir=
+```
 
 ### Parallelizing Data Processing
 By default, dataset conversion is single-threaded. If you are parsing a large dataset, you can use parallel processing.

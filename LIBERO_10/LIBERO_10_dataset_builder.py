@@ -26,6 +26,8 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
             joint_states = F['data'][f"demo_{demo_id}"]["obs"]["joint_states"][()]
             images = F['data'][f"demo_{demo_id}"]["obs"]["agentview_rgb"][()]
             wrist_images = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_rgb"][()]
+            depths = F['data'][f"demo_{demo_id}"]["obs"]["agentview_depth"][()]
+            wrist_depths = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_depth"][()]
 
         # compute language instruction
         raw_file_string = os.path.basename(episode_path).split('/')[-1]
@@ -45,6 +47,8 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
                 'observation': {
                     'image': images[i][::-1,::-1],
                     'wrist_image': wrist_images[i][::-1,::-1],
+                    'depth': depths[i][::-1,::-1],
+                    'wrist_depth': wrist_depths[i][::-1,::-1],
                     'state': np.asarray(np.concatenate((states[i], gripper_states[i]), axis=-1), np.float32),
                     'joint_state': np.asarray(joint_states[i], dtype=np.float32),
                 },
@@ -113,6 +117,16 @@ class LIBERO10(MultiThreadedDatasetBuilder):
                             encoding_format='jpeg',
                             doc='Wrist camera RGB observation.',
                         ),
+                        "depth": tfds.features.Tensor(
+                            shape=(256, 256, 1),
+                            dtype=np.float32,
+                            doc="Main camera depth map (float32).",
+                        ),
+                        "wrist_depth": tfds.features.Tensor(
+                            shape=(256, 256, 1),
+                            dtype=np.float32,
+                            doc="Wrist camera depth map (float32).",
+                        ),
                         'state': tfds.features.Tensor(
                             shape=(8,),
                             dtype=np.float32,
@@ -163,5 +177,5 @@ class LIBERO10(MultiThreadedDatasetBuilder):
     def _split_paths(self):
         """Define filepaths for data splits."""
         return {
-            "train": glob.glob("/PATH/TO/LIBERO/libero/datasets/libero_10_no_noops/*.hdf5"),
+            "train": glob.glob("/mnt/project/public/public_datasets/mix-crop-front-depth-side-290cat-200w/libero_no_noops_depth/libero_10/*.hdf5"),
         }
