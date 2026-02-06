@@ -4,9 +4,7 @@ import os
 import h5py
 import glob
 import numpy as np
-import tensorflow as tf
 import tensorflow_datasets as tfds
-import sys
 from LIBERO_Goal.conversion_utils import MultiThreadedDatasetBuilder
 
 
@@ -25,9 +23,9 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
             gripper_states = F['data'][f"demo_{demo_id}"]["obs"]["gripper_states"][()]
             joint_states = F['data'][f"demo_{demo_id}"]["obs"]["joint_states"][()]
             images = F['data'][f"demo_{demo_id}"]["obs"]["agentview_rgb"][()]
-            wrist_images = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_rgb"][()]
+            # wrist_images = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_rgb"][()]
             depths = F['data'][f"demo_{demo_id}"]["obs"]["agentview_depth"][()]
-            wrist_depths = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_depth"][()]
+            # wrist_depths = F['data'][f"demo_{demo_id}"]["obs"]["eye_in_hand_depth"][()]
 
         # compute language instruction
         raw_file_string = os.path.basename(episode_path).split('/')[-1]
@@ -46,9 +44,9 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
             episode.append({
                 'observation': {
                     'image': images[i][::-1,::-1],
-                    'wrist_image': wrist_images[i][::-1,::-1],
+                    # 'wrist_image': wrist_images[i][::-1,::-1],
                     'depth': depths[i][::-1,::-1],
-                    'wrist_depth': wrist_depths[i][::-1,::-1],
+                    # 'wrist_depth': wrist_depths[i][::-1,::-1],
                     'state': np.asarray(np.concatenate((states[i], gripper_states[i]), axis=-1), np.float32),
                     'joint_state': np.asarray(joint_states[i], dtype=np.float32),
                 },
@@ -111,22 +109,22 @@ class LIBEROGoal(MultiThreadedDatasetBuilder):
                             encoding_format='jpeg',
                             doc='Main camera RGB observation.',
                         ),
-                        'wrist_image': tfds.features.Image(
-                            shape=(256, 256, 3),
-                            dtype=np.uint8,
-                            encoding_format='jpeg',
-                            doc='Wrist camera RGB observation.',
-                        ),
+                        # 'wrist_image': tfds.features.Image(
+                        #     shape=(256, 256, 3),
+                        #     dtype=np.uint8,
+                        #     encoding_format='jpeg',
+                        #     doc='Wrist camera RGB observation.',
+                        # ),
                         "depth": tfds.features.Tensor(
                             shape=(256, 256, 1),
                             dtype=np.float32,
                             doc="Main camera depth map (float32).",
                         ),
-                        "wrist_depth": tfds.features.Tensor(
-                            shape=(256, 256, 1),
-                            dtype=np.float32,
-                            doc="Wrist camera depth map (float32).",
-                        ),
+                        # "wrist_depth": tfds.features.Tensor(
+                        #     shape=(256, 256, 1),
+                        #     dtype=np.float32,
+                        #     doc="Wrist camera depth map (float32).",
+                        # ),
                         'state': tfds.features.Tensor(
                             shape=(8,),
                             dtype=np.float32,
